@@ -1,13 +1,22 @@
 package com.lfs.excel.util;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.resource.ClassPathResource;
-import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.poi.excel.WorkbookUtil;
+import static com.lfs.excel.constans.SystemConst.TEMPLATE_CLASS_XLSX;
+import static com.lfs.excel.constans.SystemConst.TEMPLATE_TEACHER_XLSX;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.enums.WriteDirectionEnum;
-import com.alibaba.excel.util.FileUtils;
 import com.alibaba.excel.util.StringUtils;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.alibaba.excel.write.metadata.fill.FillConfig;
@@ -18,20 +27,10 @@ import com.lfs.excel.vo.ClassTable;
 import com.lfs.excel.vo.CourseTable;
 import com.lfs.excel.vo.CourseVo;
 import com.lfs.excel.vo.TeacherTable;
+
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.poi.excel.WorkbookUtil;
 import lombok.SneakyThrows;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-
-import java.io.File;
-import java.nio.file.Files;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static com.lfs.excel.constans.SystemConst.TEMPLATE_CLASS_XLSX;
-import static com.lfs.excel.constans.SystemConst.TEMPLATE_TEACHER_XLSX;
 
 /**
  * WriteUtil
@@ -43,7 +42,6 @@ import static com.lfs.excel.constans.SystemConst.TEMPLATE_TEACHER_XLSX;
  * @modify 2022/10/3
  */
 public class WriteUtil {
-
 
     public static void main(String[] args) {
         System.out.println(String.format("d%d%02d", 3, 10));
@@ -71,7 +69,8 @@ public class WriteUtil {
     }
 
     @SneakyThrows
-    public static void write(String templateFileName, String destFileName, Map<String, ? extends CourseTable> courseTableMap) {
+    public static void write(String templateFileName, String destFileName,
+            Map<String, ? extends CourseTable> courseTableMap) {
         File copyTemplateFile = getInstantFile(templateFileName, "tpl_" + destFileName);
         Workbook workbook = WorkbookUtil.createBookForWriter(copyTemplateFile);
         courseTableMap.forEach((sheet, teacherTable) -> {
@@ -84,7 +83,6 @@ public class WriteUtil {
 
         File file = getInstantFile(templateFileName, destFileName);
         try (ExcelWriter excelWriter = EasyExcel.write(file).withTemplate(copyTemplateFile).build()) {
-
 
             courseTableMap.forEach((sheet, courseTable) -> {
                 WriteSheet writeSheet = EasyExcel.writerSheet(sheet).build();
@@ -106,14 +104,14 @@ public class WriteUtil {
     }
 
     @SneakyThrows
-    public static void writeTotal(String templateFileName, String destFileName, Map<String, ClassTable> courseTableMap) {
+    public static void writeTotal(String templateFileName, String destFileName,
+            Map<String, ClassTable> courseTableMap) {
         File copyTemplateFile = getInstantFile(templateFileName, "tpl_" + destFileName);
         Workbook workbook = WorkbookUtil.createBookForWriter(copyTemplateFile);
         workbook.write(Files.newOutputStream(copyTemplateFile.toPath()));
 
         File file = getInstantFile(templateFileName, destFileName);
         try (ExcelWriter excelWriter = EasyExcel.write(file).withTemplate(copyTemplateFile).build()) {
-
 
             courseTableMap.forEach((sheet, courseTable) -> {
                 int classId = SystemConst.toClassId(sheet);
@@ -126,12 +124,15 @@ public class WriteUtil {
                     List<CourseVo> course = Lists.newArrayList(courseTable.getDcTable()[i]);
                     List<Map> courseVos = course.stream().map((Function<CourseVo, Map>) courseVo -> {
                         Map<String, Object> ans = new LinkedHashMap<>();
-                        if (StringUtils.isNotBlank(courseVo.getCname1()) || StringUtils.isNotBlank(courseVo.getCname2())) {
-                            if (StringUtils.isNotBlank(courseVo.getCname1()) && StringUtils.isNotBlank(courseVo.getCname2())) {
-                                ans.put("cname", String.format("单周%s/双周%s", courseVo.getCname1(), courseVo.getCname2()));
-                            } else if (StringUtils.isNotBlank(courseVo.getCname1()) ) {
+                        if (StringUtils.isNotBlank(courseVo.getCname1())
+                                || StringUtils.isNotBlank(courseVo.getCname2())) {
+                            if (StringUtils.isNotBlank(courseVo.getCname1())
+                                    && StringUtils.isNotBlank(courseVo.getCname2())) {
+                                ans.put("cname",
+                                        String.format("单周%s/双周%s", courseVo.getCname1(), courseVo.getCname2()));
+                            } else if (StringUtils.isNotBlank(courseVo.getCname1())) {
                                 ans.put("cname", String.format("单周%s", courseVo.getCname1()));
-                            } else if (StringUtils.isNotBlank(courseVo.getCname1()) ) {
+                            } else if (StringUtils.isNotBlank(courseVo.getCname1())) {
                                 ans.put("cname", String.format("双周%s", courseVo.getCname2()));
                             } else {
                                 ans.put("cname", courseVo.getCname() + courseVo.getTname());
@@ -152,7 +153,7 @@ public class WriteUtil {
     }
 
     private static String filterSheetName(String className) {
-        String[] classPrefix = {"初一", "初二", "初三"};
+        String[] classPrefix = { "初一", "初二", "初三" };
         for (String prefix : classPrefix) {
             if (className.contains(prefix)) {
                 return prefix;
@@ -161,11 +162,9 @@ public class WriteUtil {
         return "";
     }
 
-
     private static File getInstantFile(String templateFileName, String destFileName) {
 
         String templateFilePath = new File(templateFileName).getAbsolutePath();
-
 
         String destFilePath = new File("output/" + destFileName).getAbsolutePath();
 

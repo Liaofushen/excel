@@ -35,20 +35,16 @@
 <!--            <fileMode>0755</fileMode> &lt;!&ndash; 设置文件 UNIX 属性，是一种读写权限 &ndash;&gt;-->
 <!--        </fileSet>-->
         <fileSet>
-            <directory>src/main/resources/input</directory>
+            <directory>input</directory>
             <outputDirectory>input</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>src/main/resources/output</directory>
+            <directory>output</directory>
             <outputDirectory>output</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>src/main/resources/template</directory>
+            <directory>template</directory>
             <outputDirectory>template</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>src/main/resources</directory>
-            <outputDirectory>.</outputDirectory>
         </fileSet>
 
     </fileSets>
